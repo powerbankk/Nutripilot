@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<title>NutriPilot V3</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#0f172a;--muted:#64748b;--line:#e5e7eb;--blue:#2563eb;--green:#16a34a;--orange:#f59e0b;--red:#ef4444;--purple:#7c3aed}
+*{box-sizing:border-box}html,body{margin:0;background:#dfe4ea;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+.app{width:min(430px,100%);min-height:100vh;margin:auto;background:var(--bg);padding-bottom:92px}
+.top{padding:20px 18px 15px;background:linear-gradient(145deg,#0f172a,#1e293b);color:white;border-radius:0 0 28px 28px}
+.topline{display:flex;justify-content:space-between;align-items:center}.brand{font-size:25px;font-weight:850}.date{font-size:12px;opacity:.7;margin-top:4px}.iconbtn{width:40px;height:40px;border-radius:13px;background:#ffffff18;color:white;border:1px solid #ffffff22;font-size:18px}
+.hero{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.heroBox{background:#ffffff12;border:1px solid #ffffff18;border-radius:17px;padding:12px}.heroBox span{font-size:11px;opacity:.7}.heroBox b{display:block;font-size:24px;margin-top:2px}
+.content{padding:14px 15px}.card{background:var(--card);border:1px solid var(--line);border-radius:19px;padding:15px;margin-bottom:12px;box-shadow:0 5px 18px #0f172a08}
+h2{font-size:16px;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{font-size:11px;color:var(--muted);display:block;margin-bottom:5px}
+input,select{width:100%;padding:11px;border:1px solid #d7dce3;border-radius:12px;background:white;color:var(--ink);font:inherit}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 13px}.primary{background:var(--ink);color:#fff}.blue{background:#eaf1ff;color:#1d4ed8}.soft{background:#f1f5f9;color:#334155}.danger{background:#fee2e2;color:#991b1b}.row{display:flex;gap:8px}.row>*{flex:1}
+.macro{margin-bottom:12px}.macroHead{display:flex;justify-content:space-between;font-size:12px}.bar{height:10px;background:#e9edf2;border-radius:99px;overflow:hidden;margin-top:5px}.fill{height:100%;width:0;border-radius:99px;transition:.3s}.fk{background:#111827}.fp{background:var(--blue)}.fc{background:var(--orange)}.ff{background:var(--green)}
+.status{padding:12px;border-radius:14px;background:#f8fafc;font-size:13px;line-height:1.6}.good{color:#15803d;font-weight:800}.warn{color:#b45309;font-weight:800}.bad{color:#b91c1c;font-weight:800}
+.food{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #eef0f3}.food:last-child{border:0}.food b{font-size:14px}.food small{color:var(--muted);font-size:11px}.tag{font-size:10px;background:#f1f5f9;border-radius:99px;padding:3px 7px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}.chip{white-space:nowrap;background:#f1f5f9;color:#334155;border-radius:99px;padding:8px 11px;font-size:12px}
+canvas{width:100%;height:180px;background:#fafafa;border-radius:14px}.note{font-size:11px;line-height:1.55;color:var(--muted)}
+.empty{text-align:center;padding:20px;color:var(--muted);font-size:13px}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);height:78px;background:#fffffff4;backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:20;padding:8px 5px env(safe-area-inset-bottom)}
+.nav{background:transparent;color:#64748b;font-size:9px;padding:5px}.nav b{display:block;font-size:18px;margin-bottom:2px}.nav.active{color:#111827}
+.modal{position:fixed;inset:0;background:#0007;z-index:50;display:none;align-items:flex-end}.modalBox{width:min(430px,100%);background:white;border-radius:24px 24px 0 0;padding:18px;max-height:88vh;overflow:auto}
+hr{border:0;border-top:1px solid #eee;margin:13px 0}.mini{font-size:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#f8fafc;border-radius:13px;padding:11px}.metric b{display:block;font-size:18px;margin-top:2px}.listrow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<div class="topline"><div><div class="brand">NutriPilot <span style="font-size:13px;opacity:.6">V3</span></div><div class="date" id="date"></div></div><button class="iconbtn" onclick="openSettings()">⚙️</button></div>
+<div class="hero">
+<div class="heroBox"><span>วันนี้กิน</span><b id="heroK">0</b><span>kcal</span></div>
+<div class="heroBox"><span id="heroBL">kcal เหลือ</span><b id="heroB">0</b><span id="heroSub">target balance</span></div>
+</div>
+</header>
+
+<main class="content">
+<section class="card">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>🎯 Today's Target</h2><span class="tag" id="goalTag">Lean</span></div>
+<div class="two"><div class="metric"><span class="note">TDEE</span><b id="tdee">—</b></div><div class="metric"><span class="note">Target</span><b id="target">—</b></div></div>
+<div style="margin-top:10px">
+<label>📅 วันนี้</label>
+<select id="dayType" onchange="setDayType(this.value)">
+<option value="rest">🛌 Rest Day — ไม่ออกกำลัง</option>
+<option value="workout">🏋️ Workout Day — ออกกำลัง</option>
+</select>
+</div>
+<div class="status" style="margin-top:10px" id="status">เพิ่มอาหารเพื่อเริ่มวิเคราะห์</div>
+<div class="status" style="margin-top:10px">
+  🏋️ <b>Lean guideline</b><br>
+  วันออกกำลัง ≈ <b>2,300 kcal</b> • วันพัก ≈ <b>2,100 kcal</b><br>
+  🍚 Carb โดยประมาณ: Workout <b>300–325 g</b> • Rest <b>260–280 g</b><br>
+  📅 เฉลี่ย 3 วันออก + 4 วันพัก ≈ <b>2,186 kcal/day</b>
+</div>
+</section>
+
+<section class="card">
+<h2>📊 Macro Progress</h2>
+<div class="macro"><div class="macroHead"><span>💪 Protein</span><span id="mp">0 / 0 g</span></div><div class="bar"><div class="fill fp" id="bp"></div></div></div>
+<div class="macro"><div class="macroHead"><span>🍚 Carbs</span><span id="mc">0 / 0 g</span></div><div class="bar"><div class="fill fc" id="bc"></div></div></div>
+<div class="macro"><div class="macroHead"><span>🥑 Fat</span><span id="mf">0 / 0 g</span></div><div class="bar"><div class="fill ff" id="bf"></div></div></div>
+<div class="macro"><div class="macroHead"><span>🔥 Calories</span><span id="mk">0 / 0 kcal</span></div><div class="bar"><div class="fill fk" id="bk"></div></div></div>
+</section>
+
+<section class="card">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>🍽️ Quick Add</h2><span class="tag">แตะ = +1 serving</span></div>
+<div class="chips" id="quick"></div>
+<div class="row" style="margin-top:10px"><button class="primary" onclick="openFood()">＋ เพิ่มอาหาร</button><button class="blue" onclick="openSearch()">🔎 ค้นหา</button></div>
+</section>
+
+<section class="card">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>📋 วันนี้</h2><span class="link" style="color:#2563eb;font-size:11px" onclick="openDayTools()">จัดการ</span></div>
+<div id="todayList" class="empty">ยังไม่มีอาหาร</div>
+</section>
+
+<section class="card">
+<h2>🧠 Smart Coach</h2>
+<div id="recommend" class="status">รอข้อมูล...</div>
+</section>
+
+<section class="card">
+<h2>🍴 “กินอะไรดี?”</h2>
+<div id="mealIdeas" class="status">เพิ่มอาหารก่อน แล้วระบบจะเลือกตัวเลือกที่เติม macro ที่ขาดให้</div>
+</section>
+
+<section class="card">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>📈 Weekly Check</h2><span class="tag">7 วันล่าสุด</span></div>
+<div class="two">
+<div class="metric"><span class="note">Avg kcal (7d)</span><b id="avgK">—</b></div><div class="metric"><span class="note">Avg protein</span><b id="avgP">—</b></div>
+<div class="metric"><span class="note">Weight avg (7d)</span><b id="avgW">—</b></div><div class="metric"><span class="note">Trend</span><b id="trend">—</b></div>
+</div>
+<div class="status" style="margin-top:10px" id="weeklyCoach">ยังมีข้อมูลไม่พอ</div>
+</section>
+
+<section class="card">
+<h2>📉 Progress Chart</h2><canvas id="chart" width="800" height="360"></canvas>
+</section>
+
+<section class="card">
+<h2>⚖️ Weight & Activity</h2>
+<div class="grid"><div><label>น้ำหนักวันนี้ kg</label><input id="weightLog" type="number" step=".1"></div><button class="primary" style="align-self:end" onclick="logWeight()">บันทึกน้ำหนัก</button></div>
+<hr>
+<div class="grid"><div><label>Cardio kcal (optional)</label><input id="active" type="number" value="0"></div><div><label>Weight training kcal (optional)</label><input id="lifting" type="number" value="0"></div></div>
+<div class="note" style="margin-top:8px">Activity calories ใช้ดูประกอบ ไม่ได้เอาไปบวก/ลบ TDEE อัตโนมัติ เพื่อป้องกัน double-count จาก smartwatch</div>
+</section>
+
+<section class="card">
+<h2>🛠️ Backup</h2>
+<div class="row"><button class="soft" onclick="exportData()">⬇️ Export</button><button class="soft" onclick="importData()">⬆️ Import</button><button class="danger" onclick="resetAll()">Reset</button></div>
+<div class="note" style="margin-top:8px">Export ช่วยสำรองเมนู ประวัติอาหาร น้ำหนัก และ settings ไว้เป็นไฟล์ JSON</div>
+</section>
+</main>
+
+<nav class="bottom">
+<button class="nav active" onclick="topScroll()"><b>⌂</b>Home</button>
+<button class="nav" onclick="openFood()"><b>＋</b>Food</button>
+<button class="nav" onclick="openSearch()"><b>⌕</b>Search</button>
+<button class="nav" onclick="openHistory()"><b>↗</b>History</button>
+<button class="nav" onclick="openSettings()"><b>⚙</b>Settings</button>
+</nav>
+</div>
+
+<div class="modal" id="modal"><div class="modalBox" id="modalBox"></div></div>
+
+<script>
+const KEY='NutriPilotV3';
+let db=JSON.parse(localStorage.getItem(KEY)||'{"profile":{"w":59,"h":174,"age":27,"sex":"m","act":1.55,"goal":"cut"},"foods":[],"days":{},"weights":{},"activity":{}}');
+db.profile.dayType=db.profile.dayType||'rest';
+const today=()=>new Date().toISOString().slice(0,10),day=()=>db.days[today()]||[];
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function targets(){
+  let p=db.profile,w=p.w,h=p.h,a=p.age,
+      b=p.sex==='m'?10*w+6.25*h-5*a+5:10*w+6.25*h-5*a-161,
+      t=Math.round(b*p.act),
+      dayType=p.dayType||'rest',
+      target=dayType==='workout'?2300:2100,
+      pro=Math.round(w*2),
+      fat=60,
+      carb=Math.max(0,Math.round((target-pro*4-fat*9)/4));
+  return{bmr:b,tdee:t,target,pro,carb,fat,dayType}
+}
+function sums(d=day()){return d.reduce((a,x)=>({k:a.k+x.k*x.n,p:a.p+x.p*x.n,c:a.c+x.c*x.n,f:a.f+x.f*x.n}),{k:0,p:0,c:0,f:0})}
+function render(){let t=targets(),s=sums();document.getElementById('date').textContent=new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('tdee').textContent=t.tdee+' kcal';document.getElementById('target').textContent=t.target+' kcal';document.getElementById('goalTag').textContent='Lean';document.getElementById('dayType').value=t.dayType;document.getElementById('heroK').textContent=Math.round(s.k);let bal=t.target-s.k;document.getElementById('heroB').textContent=Math.abs(Math.round(bal));document.getElementById('heroBL').textContent=bal>=0?'kcal เหลือ':'kcal เกิน';document.getElementById('heroSub').textContent=bal>=0?'to target':'over target';
+document.getElementById('mp').textContent=Math.round(s.p)+' / '+t.pro+' g';document.getElementById('mc').textContent=Math.round(s.c)+' / '+t.carb+' g';document.getElementById('mf').textContent=Math.round(s.f)+' / '+t.fat+' g';document.getElementById('mk').textContent=Math.round(s.k)+' / '+t.target+' kcal';
+[['bp',s.p,t.pro],['bc',s.c,t.carb],['bf',s.f,t.fat],['bk',s.k,t.target]].forEach(a=>document.getElementById(a[0]).style.width=Math.min(100,a[1]/a[2]*100)+'%');
+coach(t,s);renderList();renderQuick();mealIdeas(t,s);weekly();chart(s,t)}
+function setDayType(v){db.profile.dayType=v;save();render()}
+function coach(t,s){let r=[];let kp=t.target-s.k,pp=t.pro-s.p,cp=t.carb-s.c,fp=t.fat-s.f;if(pp>5)r.push('💪 <b>Protein ขาด '+Math.round(pp)+' g</b>');if(cp>5)r.push('🍚 <b>Carb ขาด '+Math.round(cp)+' g</b>');if(fp>5)r.push('🥑 <b>Fat ขาด '+Math.round(fp)+' g</b>');if(kp>100)r.push('🔥 เหลือ '+Math.round(kp)+' kcal');if(kp<-100)r.push('⚠️ เกิน target '+Math.round(-kp)+' kcal');if(!r.length)r.push('<span class="good">✅ วันนี้ macro อยู่ในโซนดีแล้ว ไม่ต้องฝืนให้เป๊ะ 100%</span>');document.getElementById('status').innerHTML=r.join('<br>');document.getElementById('recommend').innerHTML=recommendText(t,s)}
+function recommendText(t,s){let r=[];let pp=t.pro-s.p,cp=t.carb-s.c,fp=t.fat-s.f;if(pp>5)r.push('💪 เติมโปรตีน lean: <b>สันนอก 100–150 g</b>, อกไก่, ปลา หรือ whey isolate');if(cp>15)r.push('🍚 เติมคาร์บ: <b>ข้าว 100–150 g</b>, หมี่ 0.5–1 ก้อน หรือกล้วย 1 ลูก');if(fp>15)r.push('🥑 ไขมันยังเหลือ: ไข่ 1 ฟองหรือถั่วปริมาณพอดีได้');if(fp<0)r.push('🥑 วันนี้ไขมันเกินแล้ว: มื้อถัดไปเน้นต้ม/ย่างและเนื้อไม่ติดมัน');if(!r.length)r.push('🎯 <span class="good">ปิดวันได้ดีแล้วครับ</span>');return r.join('<br><br>')}
+function mealIdeas(t,s){let needP=Math.max(0,t.pro-s.p),needC=Math.max(0,t.carb-s.c),needK=Math.max(0,t.target-s.k),fatRoom=Math.max(0,t.fat-s.f);let ideas=[];if(needP>15&&needC>25&&fatRoom>8)ideas.push('🥇 <b>สันนอก 150 g + หมี่ขาว 1 ก้อน</b><br><span class="note">เติม P/C ได้พร้อมกัน ไขมันไม่สูง</span>');if(needP>15&&needC<25)ideas.push('🥈 <b>สันนอก 150 g + ไข่ 1 ฟอง</b><br><span class="note">เหมาะเมื่อคาร์บใกล้ครบแล้ว</span>');if(needC>25&&needP<15)ideas.push('🥉 <b>กล้วย 1 ลูก + ข้าว/หมี่</b><br><span class="note">เน้นเติมคาร์บโดยไม่เพิ่มโปรตีนเกินจำเป็น</span>');if(needK<150&&needP<10&&needC<10)ideas.push('✅ <b>ไม่ต้องเพิ่มอะไร</b><br><span class="note">วันนี้ถึงเป้าแล้ว</span>');document.getElementById('mealIdeas').innerHTML=ideas.length?ideas.join('<hr>'):'🍽️ ใส่อาหารเพิ่มอีกนิด ระบบจะเลือกเมนูให้แม่นขึ้น'}
+function renderList(){let e=document.getElementById('todayList'),d=day();if(!d.length){e.innerHTML='ยังไม่มีอาหาร';return}e.innerHTML=d.map((x,i)=>`<div class="food"><div><b>${esc(x.name)}</b><br><small>${x.n} serving • ${Math.round(x.k*x.n)} kcal • P ${Math.round(x.p*x.n)} / C ${Math.round(x.c*x.n)} / F ${Math.round(x.f*x.n)}</small></div><button class="danger" onclick="del(${i})">ลบ</button></div>`).join('')}
+function renderQuick(){let e=document.getElementById('quick'),f=db.foods.slice(-14).reverse();e.innerHTML=f.length?f.map(x=>`<button class="chip" onclick="quick(${db.foods.indexOf(x)})">${esc(x.name)}</button>`).join(''):'<span class="note">ยังไม่มีเมนูโปรด</span>'}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function openFood(){let f=db.foods;show(`<h2>🍽️ เพิ่มอาหาร</h2><label>เมนูที่จำไว้</label><select id="sel"><option value="">— เลือกเมนู —</option>${f.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join('')}</select><div class="grid" style="margin-top:10px"><div><label>ชื่อ</label><input id="fn"></div><div><label>serving</label><input id="fs" type="number" value="1" step=".1"></div><div><label>kcal</label><input id="fk" type="number"></div><div><label>Protein g</label><input id="fp" type="number"></div><div><label>Carb g</label><input id="fc" type="number"></div><div><label>Fat g</label><input id="ff" type="number"></div></div><div class="row" style="margin-top:12px"><button class="primary" onclick="addModal()">เพิ่มวันนี้</button><button class="blue" onclick="rememberModal()">💾 จำเมนู</button></div><hr><div class="note">ใช้ค่าที่ได้จากฉลากหรือข้อมูลที่ผมหาให้ แล้วแก้ไขได้ก่อนจำเมนู</div>`);document.getElementById('sel').onchange=function(){let x=db.foods[this.value];if(!x)return;fn.value=x.name;fk.value=x.k;fp.value=x.p;fc.value=x.c;ff.value=x.f}}
+function modalObj(){return{name:fn.value.trim(),n:parseFloat(fs.value)||1,k:parseFloat(fk.value)||0,p:parseFloat(fp.value)||0,c:parseFloat(fc.value)||0,f:parseFloat(ff.value)||0}}
+function addModal(){let x=modalObj();if(!x.name)return alert('ใส่ชื่ออาหารครับ');db.days[today()]=[...day(),x];save();close();render()}
+function rememberModal(){let x=modalObj();if(!x.name)return alert('ใส่ชื่ออาหารครับ');let i=db.foods.findIndex(y=>y.name.toLowerCase()===x.name.toLowerCase());if(i>=0)db.foods[i]={...x,n:1};else db.foods.push({...x,n:1});save();alert('จำเมนูแล้ว 👍');close();render()}
+function quick(i){let x=db.foods[i];db.days[today()]=[...day(),{...x,n:1}];save();render()}
+function del(i){db.days[today()].splice(i,1);save();render()}
+function openDayTools(){show(`<h2>📋 Day Tools</h2><button class="danger" style="width:100%" onclick="clearDay();close()">ล้างอาหารวันนี้</button><div class="note" style="margin-top:10px">เมนูที่จำไว้และประวัติน้ำหนักจะไม่ถูกลบ</div>`)}
+function clearDay(){if(confirm('ล้างอาหารวันนี้?')){db.days[today()]=[];save();render()}}
+function openSearch(){show(`<h2>🔎 Food Search</h2><input id="q" placeholder="เช่น ชาชูเมน ฮาจิบัง / เย็นตาโฟ / KFC"><button class="blue" style="width:100%;margin-top:9px" onclick="webSearch()">🌐 เปิดค้นหาเว็บ</button><hr><div class="note">V3 เป็น local-first จึงไม่แกล้งทำเป็นค้นเว็บในตัวเอง เมื่อกดปุ่มจะเปิดผลค้นหาในเบราว์เซอร์ จากนั้นนำค่า kcal/P/C/F มาใส่ใน Food และจำเมนูไว้ได้</div>`)}
+function webSearch(){let q=document.getElementById('q').value.trim();if(!q)return;window.open('https://www.google.com/search?q='+encodeURIComponent(q+' calories protein carbs fat'),'_blank')}
+function openSettings(){let p=db.profile;show(`<h2>⚙️ Settings</h2><div class="grid"><div><label>น้ำหนัก kg</label><input id="sw" value="${p.w}" type="number" step=".1"></div><div><label>ส่วนสูง cm</label><input id="sh" value="${p.h}" type="number"></div><div><label>อายุ</label><input id="sa" value="${p.age}" type="number"></div><div><label>เพศ</label><select id="ss"><option value="m" ${p.sex==='m'?'selected':''}>ชาย</option><option value="f" ${p.sex==='f'?'selected':''}>หญิง</option></select></div><div><label>Activity</label><select id="sact"><option value="1.2">นั่งเป็นหลัก</option><option value="1.375">เบา</option><option value="1.55">ปานกลาง</option><option value="1.725">หนัก</option></select></div></div><div class="row" style="margin-top:12px"><button class="primary" onclick="saveSettings()">บันทึก</button><button class="danger" onclick="clearDay();close()">ล้างวันนี้</button></div><hr><div class="note">Protein ~2 g/kg. Fat fix 60 g. Lean guideline: Workout ~2,300 kcal / Rest ~2,100 kcal; Carb = calories ที่เหลือ; 3 workout + 4 rest ≈ 2,186 kcal/day</div>`);sact.value=p.act;sg.value=p.goal}
+function saveSettings(){db.profile={w:parseFloat(sw.value)||59,h:parseFloat(sh.value)||174,age:parseFloat(sa.value)||27,sex:ss.value,act:parseFloat(sact.value),goal:'lean',dayType:db.profile.dayType||'rest'};save();close();render()}
+function logWeight(){let w=parseFloat(document.getElementById('weightLog').value);if(!w)return;db.weights[today()]=w;save();alert('บันทึก '+w+' kg แล้วครับ 👍');render()}
+function weekly(){
+  let now=new Date(),keys=[];
+  for(let i=6;i>=0;i--){
+    let d=new Date(now);
+    d.setHours(12,0,0,0);
+    d.setDate(now.getDate()-i);
+    keys.push(d.toISOString().slice(0,10));
+  }
+
+  let loggedDays=keys.filter(k=>Array.isArray(db.days[k])),
+      ds=loggedDays.map(k=>sums(db.days[k])),
+      avgK=ds.length?ds.reduce((a,x)=>a+x.k,0)/ds.length:0,
+      avgP=ds.length?ds.reduce((a,x)=>a+x.p,0)/ds.length:0;
+
+  document.getElementById('avgK').textContent=ds.length?Math.round(avgK):'—';
+  document.getElementById('avgP').textContent=ds.length?Math.round(avgP)+' g':'—';
+
+  let weightDays=keys.filter(k=>Number.isFinite(Number(db.weights[k]))),
+      ws=weightDays.map(k=>Number(db.weights[k]));
+
+  if(ws.length){
+    let av=ws.reduce((a,x)=>a+x,0)/ws.length;
+    document.getElementById('avgW').textContent=av.toFixed(1)+' kg';
+
+    let first=ws[0],last=ws[ws.length-1],delta=last-first;
+    document.getElementById('trend').textContent=(delta>0?'+':'')+delta.toFixed(1)+' kg';
+
+    let coverage=loggedDays.length+'/7 วันอาหาร • '+weightDays.length+'/7 วันน้ำหนัก';
+    let trendText=delta<0?'🟢 แนวโน้มน้ำหนักลดลง':delta>0?'🟡 แนวโน้มน้ำหนักเพิ่มขึ้น':'🟢 น้ำหนักทรงตัว';
+    document.getElementById('weeklyCoach').innerHTML=
+      '<b>'+trendText+'</b><br>'+
+      '📊 '+coverage+'<br>'+
+      '⚖️ ค่าเฉลี่ยน้ำหนัก 7 วัน: <b>'+av.toFixed(1)+' kg</b>'+
+      (ws.length>=2?' • เปลี่ยนแปลงในช่วงนี้: <b>'+(delta>0?'+':'')+delta.toFixed(1)+' kg</b>':'')+
+      (loggedDays.length<7?''
+        :'<br>🔥 ค่าเฉลี่ยพลังงานจากข้อมูลที่บันทึก: <b>'+Math.round(avgK)+' kcal/day</b>');
+  }else{
+    document.getElementById('avgW').textContent='—';
+    document.getElementById('trend').textContent='—';
+    document.getElementById('weeklyCoach').innerHTML=
+      'ยังไม่มีน้ำหนักใน 7 วันล่าสุด<br>📊 อาหารที่บันทึก: '+loggedDays.length+'/7 วัน';
+  }
+
+  if(ds.length && !ws.length){
+    document.getElementById('weeklyCoach').innerHTML +=
+      '<br>🍽️ ค่าเฉลี่ยพลังงานจากวันที่บันทึก: <b>'+Math.round(avgK)+' kcal/day</b>';
+  }
+}
+function openHistory(){let e=Object.entries(db.weights).sort((a,b)=>a[0].localeCompare(b[0])).slice(-14).reverse();show(`<h2>📈 History</h2>${e.length?e.map(x=>`<div class="listrow"><b>${x[0]}</b><span>${x[1]} kg</span></div>`).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>'}<hr><div class="note">น้ำหนักควรดูเป็น trend 7–14 วัน ไม่ใช่วันเดียว</div>`)}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NutriPilot_backup_'+today()+'.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();render();alert('Import สำเร็จครับ')}catch(e){alert('ไฟล์ไม่ถูกต้อง')}};r.readAsText(i.files[0])};i.click()}
+function resetAll(){if(confirm('ลบข้อมูลทั้งหมด รวมเมนูและประวัติ?')){localStorage.removeItem(KEY);location.reload()}}
+function show(s){document.getElementById('modalBox').innerHTML=s;document.getElementById('modal').style.display='flex'}function close(){document.getElementById('modal').style.display='none'}document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')close()}
+function chart(s,t){let c=document.getElementById('chart'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);let vals=[s.k/t.target,s.p/t.pro,s.c/t.carb,s.f/t.fat],labs=['Calories','Protein','Carb','Fat'];x.font='24px -apple-system';vals.forEach((v,i)=>{let y=25+i*80;x.fillStyle='#e8edf3';x.fillRect(185,y,560,34);x.fillStyle='#0f172a';x.fillRect(185,y,Math.min(560,v*560),34);x.fillStyle='#0f172a';x.fillText(labs[i],20,y+26);x.fillText(Math.round(v*100)+'%',755,y+26)})}
+function topScroll(){window.scrollTo({top:0,behavior:'smooth'})}
+render();
+</script></body></html>
